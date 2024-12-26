@@ -1,0 +1,15 @@
+﻿{
+  "JavaHomePath": "C:\\Users\\denis\\Documents\\java\\jdk-23",
+  "ModulesPaths": [ "C:\\Users\\denis\\.m2\\repository\\org\\openjfx\\javafx-base\\23\\javafx-base-23-win.jar",
+    "C:\\Users\\denis\\.m2\\repository\\org\\openjfx\\javafx-base\\23\\javafx-base-23.jar",
+    "C:\\Users\\denis\\.m2\\repository\\org\\openjfx\\javafx-controls\\23\\javafx-controls-23-win.jar",
+    "C:\\Users\\denis\\.m2\\repository\\org\\openjfx\\javafx-controls\\23\\javafx-controls-23.jar",
+    "C:\\Users\\denis\\.m2\\repository\\org\\openjfx\\javafx-graphics\\23\\javafx-graphics-23-win.jar",
+    "C:\\Users\\denis\\.m2\\repository\\org\\openjfx\\javafx-graphics\\23\\javafx-graphics-23.jar" ],
+  "Modules": [ "javafx.base",
+    "javafx.controls",
+    "javafx.graphics" ],
+  "ClassPaths": [ "C:\\Users\\denis\\Documents\\github\\shadow\\target\\classes",
+    "C:\\Users\\denis\\.m2\\repository\\org\\jetbrains\\annotations\\26.0.1\\annotations-26.0.1.jar" ],
+  "MainClass": "org.shadow.skriva.Main"
+}

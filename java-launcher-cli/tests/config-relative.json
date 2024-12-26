@@ -1,0 +1,14 @@
+﻿{
+  "JavaHomePath": "jdk-23",
+  "ModulesPaths": [ "modules\\javafx-base-23-win.jar",
+    "modules\\javafx-base-23.jar",
+    "modules\\javafx-controls-23-win.jar",
+    "modules\\javafx-controls-23.jar",
+    "modules\\javafx-graphics-23-win.jar",
+    "modules\\javafx-graphics-23.jar" ],
+  "Modules": [ "javafx.base",
+    "javafx.controls",
+    "javafx.graphics" ],
+  "ClassPaths": [ "classes", "classes\\annotations-26.0.1.jar" ],
+  "MainClass": "org.shadow.skriva.Main"
+}

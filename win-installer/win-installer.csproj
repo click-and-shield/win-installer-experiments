@@ -1,0 +1,33 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>WinExe</OutputType>
+        <TargetFramework>net9.0-windows</TargetFramework>
+        <RootNamespace>win_installer</RootNamespace>
+        <Nullable>enable</Nullable>
+        <UseWindowsForms>true</UseWindowsForms>
+        <ImplicitUsings>enable</ImplicitUsings>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <None Remove="resources\click-and-crypt-square.jpg" />
+      <EmbeddedResource Include="resources\click-and-crypt-square.jpg">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </EmbeddedResource>
+      <None Remove="resources\thumb-up.png" />
+      <EmbeddedResource Include="resources\thumb-up.png" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="doc\images\" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.2903.40" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\common\common.csproj" />
+    </ItemGroup>
+
+</Project>

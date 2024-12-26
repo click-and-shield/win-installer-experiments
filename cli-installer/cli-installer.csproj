@@ -1,0 +1,26 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+    
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net9.0</TargetFramework>
+        <RootNamespace>installer</RootNamespace>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+        <!-- <ApplicationManifest>app.manifest</ApplicationManifest> -->
+    </PropertyGroup>
+    
+    <ItemGroup>
+      <PackageReference Include="securifybv.ShellLink" Version="0.1.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\common\common.csproj" />
+      <ProjectReference Include="..\WinTools\WinTools.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="doc\images\" />
+    </ItemGroup>
+
+</Project>

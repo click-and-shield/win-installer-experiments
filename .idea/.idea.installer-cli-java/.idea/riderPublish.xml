@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="LocationsWithSilentDeleteHolder">
+    <option name="locations">
+      <list>
+        <option value="$PROJECT_DIR$/beeper/bin/Release/net9.0/win-x64/publish" />
+        <option value="$PROJECT_DIR$/fat-generator/bin/Release/net9.0/win-x64/publish" />
+        <option value="$PROJECT_DIR$/self-extractor/bin/Release/net9.0/win-x64/publish" />
+        <option value="$PROJECT_DIR$/installer/bin/Release/net9.0/win-x64/publish" />
+        <option value="$PROJECT_DIR$/WinTools/bin/Release/net9.0/win-x64/publish" />
+        <option value="$PROJECT_DIR$/java-launcher-cli/bin/Release/net9.0/win-x64/publish" />
+        <option value="$PROJECT_DIR$/win-installer/bin/Release/net9.0-windows/win-x64/publish" />
+        <option value="$PROJECT_DIR$/content-generator/bin/Release/net9.0/win-x64/publish" />
+        <option value="$PROJECT_DIR$/java-launcher-gui-win/bin/Release/net9.0-windows/win-x64/publish" />
+        <option value="$PROJECT_DIR$/common/bin/Release/net9.0/win-x64/publish" />
+      </list>
+    </option>
+  </component>
+</project>
