@@ -1,5 +1,9 @@
 ﻿namespace WinTools;
 
+using System.Text.Json;
+using System.IO;
+using System.IO.Compression;
+
 /// <summary>
 /// Provides a simplified mechanism for installing and uninstalling Windows applications.
 /// </summary>
@@ -125,7 +129,7 @@ public class InstallerSimple
     /// The icon is specified using its absolute path.
     /// </remarks>
     /// </summary>
-    private readonly ExplorerContextualMenuEntry[] _contextualMenuEntries;
+    private readonly ExplorerContextualMenuEntry[]? _contextualMenuEntries;
     /// <summary>
     /// Determines whether detailed logs and messages are displayed during the installer's execution.
     /// When set to true, additional information is output to the console to aid in debugging or
@@ -134,79 +138,80 @@ public class InstallerSimple
     private readonly bool _verbose;
 
     public string ApplicationInstallationDirectoryPath => _applicationInstallationDirectoryPath;
+
+
+    private static InstallerConfig _loadConfig(string configPath) {
+        try {
+            var json   = File.ReadAllText(configPath);
+            var config = JsonSerializer.Deserialize<InstallerConfig>(json);
+            if (config is null) {
+                throw new Exception($"Failed to deserialize configuration file \"{configPath}\"");
+            }
+            config.Check();
+            return config;
+        }
+        catch (Exception e) {
+            throw new Exception($"Failed to load configuration file \"{configPath}\": {e.Message}", e);
+        }
+    }
     
-    /// <summary>
-    /// Creates an array of contextual menu entries for Windows Explorer based on the provided simple menu entry definitions.
-    /// Each entry is constructed using the file pattern, label, command, and icon path derived from the given parameters.
-    /// </summary>
-    /// <param name="entries">An array of simplified contextual menu entry definitions.</param>
-    /// <param name="applicationInstallationDirectoryPath">The path to the directory where the application is installed.</param>
-    /// <param name="applicationExecutablePath">The path to the main executable of the application.</param>
-    /// <returns>An array of fully constructed Windows Explorer contextual menu entries.</returns>
-    private ExplorerContextualMenuEntry[] _createMenuEntries(ExplorerContextualMenuEntrySimple[] entries, string applicationInstallationDirectoryPath, string applicationExecutablePath) {
-        var menuEntries = new ExplorerContextualMenuEntry[entries.Length];
-        for (var i = 0; i < entries.Length; i++) {
-            menuEntries[i] = new ExplorerContextualMenuEntry(entries[i].FilePattern(), 
-                                                                entries[i].Label(), 
-                                                                $"\"{applicationExecutablePath}\"  {entries[i].Arguments()}", 
-                                                                Path.Combine(applicationInstallationDirectoryPath, entries[i].IconBaseName()));
-        }
-        return menuEntries;
-    }
+    private static string _getConfigFileFromZip(string zipFilePath, string configFileName) {
+        var              zipFile     = ZipFile.OpenRead(zipFilePath);
+        ZipArchiveEntry? entry       = zipFile.GetEntry(configFileName);
+        var              extractPath = common.Os.CreateTemporaryDirectory();
 
-    /// <summary>
-    /// Defines a streamlined installer designed to handle the registration, installation, and management of an application.
-    /// This includes managing its version, publisher information, installation paths, and the integration of contextual menu entries in Windows Explorer.
-    /// 
-    /// </summary>
-    /// <param name="applicationName">The name of the application.</param>
-    /// <param name="applicationVersion">The version of the application.</param>
-    /// <param name="applicationPublisher">The publisher responsible for the application.</param>
-    /// <param name="applicationArchivePath">The path to the ZIP archive containing all the application's software components.</param>
-    /// <param name="contextualMenuEntries">Specifications for the Windows Explorer contextual menu entries.
-    /// <remarks>
-    /// Each argument for the application's menu entries must be appropriately formatted. 
-    /// Specifically, all arguments should be enclosed in double quotes ("). This is particularly important 
-    /// for the argument representing the file path to process (`%1`).
-    /// </remarks>
-    /// </param>
-    /// <param name="verbose">Enables detailed logging of the unpacking process for debugging or monitoring purposes.</param>
-    /// <exception cref="Exception">
-    /// Thrown when an error occurs during the creation or modification of the application's registry entry.
-    /// </exception>
-    public InstallerSimple(string applicationName, 
-                           string applicationVersion, 
-                           string applicationPublisher, 
-                           string applicationArchivePath, 
-                           ExplorerContextualMenuEntrySimple[] contextualMenuEntries,
-                           bool verbose = false) {
-        _applicationName                      = applicationName;
-        _applicationVersion                   = applicationVersion;
-        _applicationPublisher                 = applicationPublisher;
-        _applicationArchivePath               = applicationArchivePath;
-        _applicationInstallationDirectoryPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), $".{applicationName}");
-        _applicationIconPath                  = Path.Combine(_applicationInstallationDirectoryPath, $"{applicationName}.ico");
-        _applicationExecutablePath            = Path.Combine(_applicationInstallationDirectoryPath, $"{applicationName}.exe");
-        _applicationUninstallerPath           = Path.Combine(_applicationInstallationDirectoryPath, "Uninstall.exe");
-        _applicationRegistryKey               = $@"SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{applicationName}";
-        _applicationStartMenuShortcutPath     = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Programs), $"{applicationName}.lnk");
-        _contextualMenuEntries                = _createMenuEntries(contextualMenuEntries, _applicationInstallationDirectoryPath, _applicationExecutablePath);
-        _verbose                              = verbose;
-        
-        if (verbose)
+        if (entry != null)
         {
-            Console.WriteLine($"_installationDirectoryPath: {_applicationInstallationDirectoryPath}");
-            Console.WriteLine($"_applicationName: {_applicationName}");
-            Console.WriteLine($"_applicationVersion: {_applicationVersion}");
-            Console.WriteLine($"_applicationPublisher: {_applicationPublisher}");
-            Console.WriteLine($"_applicationExecutablePath: {_applicationExecutablePath}");
-            Console.WriteLine($"_applicationIconPath: {_applicationIconPath}");
-            Console.WriteLine($"_applicationUninstallerPath: {_applicationUninstallerPath}");
-            Console.WriteLine($"_applicationRegistryKey: {_applicationRegistryKey}");
-            Console.WriteLine($"_applicationStartMenuShortcutPath: {_applicationStartMenuShortcutPath}");
+            var destinationPath = Path.Combine(extractPath, entry.FullName);
+            Directory.CreateDirectory(Path.GetDirectoryName(destinationPath)!);
+            entry.ExtractToFile(destinationPath, overwrite: true);
+            return destinationPath;
         }
+        throw new Exception($"The configuration file \"{configFileName}\" was not found in the archive \"{zipFilePath}\".");
     }
 
+    private void _deleteConfigFile(string configFilePath) {
+        var tmpDir= Path.GetDirectoryName(configFilePath);
+        if (tmpDir is null) {
+            throw new Exception("Failed to get the directory name of the configuration file.");
+        }
+        if (_verbose) Console.WriteLine($"Deleting temporary directory \"{tmpDir}\"...");
+        Directory.Delete(tmpDir, recursive: true);
+    }
+    
+    public InstallerSimple(string archivePath, string installationPath, bool verbose = false) {
+        // Load the configuration from the configuration file.
+        var configPath = _getConfigFileFromZip(archivePath, "config-install.json");
+        if (verbose) Console.WriteLine($"Load configuration from \"{configPath}\"");
+        var config     = _loadConfig(configPath);
+        _deleteConfigFile(configPath);
+        
+        // Extract the configuration values from the loaded configuration.
+        _applicationInstallationDirectoryPath = installationPath;
+        config.PrefixRootPath(_applicationInstallationDirectoryPath);
+        var applicationExecutableBaseName = Path.GetFileNameWithoutExtension(config.ExecutablePath);
+        
+        _applicationName                  = config.Name;
+        _applicationVersion               = config.Version;
+        _applicationPublisher             = config.Publisher;
+        _applicationIconPath              = config.IconPath;
+        _applicationExecutablePath        = config.ExecutablePath;
+        _applicationRegistryKey           = $@"SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{config.RegId}";
+        _applicationStartMenuShortcutPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Programs), $"{applicationExecutableBaseName}.lnk");
+        _contextualMenuEntries            = config.ContextualMenuEntries;
+        
+        _applicationUninstallerPath = Path.Combine(_applicationInstallationDirectoryPath, "uninstall.exe");
+        _applicationArchivePath     = archivePath;
+        _verbose                    = verbose;
+
+        // Prefix the commands specified within the contextual menu entries with the application's executable path.
+        if (_contextualMenuEntries is not null) {
+            for (var i = 0; i < _contextualMenuEntries.Length; i++) {
+                _contextualMenuEntries[i].Command = $"\"{_applicationExecutablePath}\" {_contextualMenuEntries[i].Arguments}";
+            }
+        }
+    }
+    
     /// <summary>
     /// Installs the specified application by performing the following steps:
     /// (1) Unpacks the application's ZIP archive to the designated installation directory.
@@ -226,22 +231,12 @@ public class InstallerSimple
         try {
 #pragma warning disable CA1416
             if (_verbose) Console.WriteLine("Installing...");
-            InstallerTools.UnpackApplication(_applicationArchivePath, 
-                                                _applicationInstallationDirectoryPath, 
-                                                _verbose);
-            InstallerTools.RegisterApplication(_applicationRegistryKey, 
-                                                  _applicationName, 
-                                                  _applicationVersion,
-                                                  _applicationPublisher,
-                                                  _applicationInstallationDirectoryPath,
-                                                  _applicationUninstallerPath,
-                                                  _verbose);
-            InstallerTools.AddExplorerContextualMenuEntries(_contextualMenuEntries,
-                                                               _verbose);
-            InstallerTools.AddStartMenuShortcut(_applicationExecutablePath, 
-                                                   _applicationIconPath, 
-                                                   _applicationStartMenuShortcutPath, 
-                                                   _verbose);
+            InstallerTools.UnpackApplication(_applicationArchivePath, _applicationInstallationDirectoryPath, _verbose);
+            InstallerTools.RegisterApplication(_applicationRegistryKey, _applicationName, _applicationVersion, _applicationPublisher, _applicationInstallationDirectoryPath, _applicationUninstallerPath, _verbose);
+            if (_contextualMenuEntries is not null) {
+                InstallerTools.AddExplorerContextualMenuEntries(_contextualMenuEntries, _verbose);
+            }
+            InstallerTools.AddStartMenuShortcut(_applicationExecutablePath, _applicationIconPath, _applicationStartMenuShortcutPath, _verbose);
             if (_verbose) Console.WriteLine("Installation complete.");
         }
         catch (Exception e) {
@@ -260,7 +255,9 @@ public class InstallerSimple
     /// </exception>
     public void Uninstall() {
         try {
-            InstallerTools.RemoveExplorerContextualMenuEntries(_contextualMenuEntries, _verbose);
+            if (_contextualMenuEntries is not null) {
+                InstallerTools.RemoveExplorerContextualMenuEntries(_contextualMenuEntries, _verbose);    
+            }
             InstallerTools.RemoveStartMenuShortcut(_applicationStartMenuShortcutPath, _verbose);
             InstallerTools.UnregisterApplication(_applicationRegistryKey, _verbose);
             InstallerTools.RemoveApplicationFiles(_applicationInstallationDirectoryPath, _verbose);

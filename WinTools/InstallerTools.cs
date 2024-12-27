@@ -1,4 +1,4 @@
-﻿using System.IO.Compression;
+﻿using System.Security.AccessControl;
 
 namespace WinTools;
 
@@ -6,6 +6,7 @@ using System;
 using Microsoft.Win32;
 using System.Runtime.Versioning;
 using ShellLink;
+using System.IO.Compression;
 
 /// <summary>
 /// Provides tools for managing Windows application installations and integrations,
@@ -260,10 +261,10 @@ public class InstallerTools
     /// </exception>
     public static void AddExplorerContextualMenuEntries(ExplorerContextualMenuEntry[] entries, bool verbose = false) {
         foreach (var entry in entries) {
-            AddExplorerContextualMenuEntry(entry.Label(), 
-                                           entry.Command(),
-                                           entry.FilePattern(),
-                                           entry.IconPath(),
+            AddExplorerContextualMenuEntry(entry.Label, 
+                                           entry.Command,
+                                           entry.FilePattern,
+                                           entry.IconPath,
                                            verbose);
         }
     }
@@ -281,8 +282,8 @@ public class InstallerTools
     /// </exception>
     public static void RemoveExplorerContextualMenuEntries(ExplorerContextualMenuEntry[] entries, bool verbose = false) {
         foreach (var entry in entries) {
-            RemoveExplorerContextualMenuEntry(entry.Label(), 
-                                              entry.FilePattern(),
+            RemoveExplorerContextualMenuEntry(entry.Label, 
+                                              entry.FilePattern,
                                               verbose);
         }
     }
@@ -357,4 +358,6 @@ public class InstallerTools
             throw new Exception($"An error occurred while removing the Start Menu shortcut \"{applicationStartMenuShortcutPath}\": {ex.Message}");
         }
     }
+    
+
 }

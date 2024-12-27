@@ -20,26 +20,10 @@
 /// </remarks>
 /// </param>
 /// <param name="iconPath">The absolute path to the icon to display for the contextual menu entry.</param>
-public class ExplorerContextualMenuEntry(in string filePattern, in string label, in string command, in string iconPath)
-{
-    private readonly string _filePattern = filePattern;
-    private readonly string _command     = command;
-    private readonly string _iconPath    = iconPath;
-    private readonly string _label       = label;
-
-    public string FilePattern() {
-        return _filePattern; 
-    }
-
-    public string Command() {
-        return _command; 
-    }
-    
-    public string IconPath() {
-        return _iconPath; 
-    }
-    
-    public string Label() {
-        return _label; 
-    }
+public class ExplorerContextualMenuEntry {
+    public required string FilePattern { get; set; }
+    public required string Arguments   { get; set; }
+    public  string? Command    { get; set; }
+    public required string IconPath    { get; set; }
+    public required string Label       { get; set; }
 }

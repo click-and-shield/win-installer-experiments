@@ -10,27 +10,17 @@ using WinTools;
 
 void Main(string[] args) {
     var          applicationName        = "beeper";
-    const string iconEncryptName        = "icon-encrypt.ico";
-    const string iconDecryptName        = "icon-decrypt.ico";
-    const string applicationArchivePath = "Z:\\beeper.zip";
-    var entries = new[]
-                  { new ExplorerContextualMenuEntrySimple("*", "encrypt", "\"encrypt\" \"%1%\"", iconEncryptName),
-                    new ExplorerContextualMenuEntrySimple("*.skv", "decrypt", "\"decrypt\" \"%1%\"", iconDecryptName) };
+    const string applicationArchivePath = "Z:\\test-installer.zip";
+    var          installationDirPath    = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), $".{applicationName}");
 
     if (0 == args.Length) {
         Console.WriteLine("Usage: installer.exe (install | uninstall)");
         Environment.Exit(1);
     }
-
     
 #pragma warning disable CA1416
-    var installer = new InstallerSimple(applicationName, 
-                                       "1.0.0", 
-                                       "Denis",
-                                       applicationArchivePath,
-                                       entries);
+    var installer = new InstallerSimple(applicationArchivePath, installationDirPath, verbose: true);
     if ("install" == args[0]) {
-        
         installer.Install();    
     }
     else {
@@ -39,5 +29,3 @@ void Main(string[] args) {
 }
 
 Main(args);
-
-    
