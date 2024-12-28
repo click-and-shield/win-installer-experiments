@@ -8,24 +8,12 @@
 
 using WinTools;
 
-void Main(string[] args) {
+void Main() {
     var          applicationName        = "beeper";
     const string applicationArchivePath = "Z:\\test-installer.zip";
     var          installationDirPath    = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), $".{applicationName}");
-
-    if (0 == args.Length) {
-        Console.WriteLine("Usage: installer.exe (install | uninstall)");
-        Environment.Exit(1);
-    }
-    
-#pragma warning disable CA1416
-    var installer = new InstallerSimple(applicationArchivePath, installationDirPath, verbose: true);
-    if ("install" == args[0]) {
-        installer.Install();    
-    }
-    else {
-        installer.Uninstall();
-    }
+    var installer = new Installer(applicationArchivePath, installationDirPath, verbose: true);
+    installer.Run();    
 }
 
-Main(args);
+Main();

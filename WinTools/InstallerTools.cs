@@ -1,7 +1,6 @@
-﻿using System.Security.AccessControl;
+﻿namespace WinTools;
 
-namespace WinTools;
-
+using System.Diagnostics;
 using System;
 using Microsoft.Win32;
 using System.Runtime.Versioning;
@@ -47,24 +46,50 @@ public class InstallerTools
             throw new Exception($"An error occurred while extracting the application archive ({applicationZipFilePath}) in to the directory \"{applicationInstallationDirectoryPath}\": {e.Message}.");
         }
     }
-
+    
     /// <summary>
-    /// Removes all files and directories for a given application installation directory.
-    /// Ensures the directory and its contents are completely deleted.
+    /// Removes the application files from the specified installation directory by generating and executing a batch file.
+    /// Ensures that the uninstallation process is fully automated and includes the deletion of the uninstaller executable itself.
     /// </summary>
-    /// <param name="applicationInstallationDirectoryPath">The path to the directory where the application is installed.</param>
-    /// <param name="verbose">Indicates whether detailed logging of the removal process is enabled.</param>
+    /// <param name="applicationInstallationDirectoryPath">The path to the directory containing the application files to be removed.</param>
+    /// <param name="verbose">Enables detailed logging of the removal process for monitoring or debugging purposes.</param>
     /// <exception cref="Exception">
-    /// Thrown if an error occurs during the deletion process, such as directory access issues or insufficient permissions.
+    /// Thrown if there are issues during the creation or execution of the batch file,
+    /// such as file write errors, inaccessible directories, or process-related errors.
     /// </exception>
     public static void RemoveApplicationFiles(string applicationInstallationDirectoryPath, bool verbose = false) {
-        if (verbose) Console.WriteLine($"Remove application from {applicationInstallationDirectoryPath}");
+        // Create a BAT file that removes the application files from the installation directory.
+        var uninstallerFilePath = Path.Combine(applicationInstallationDirectoryPath, "uninstall.exe");
+        var batchFilePath =  Path.Combine(Path.GetTempPath(), Guid.NewGuid() + ".bat");
+        var batchContent = $"""
+                            @echo off
+                            :retry
+                            del "{uninstallerFilePath}" > nul
+                            if exist "{uninstallerFilePath}" goto retry
+                            rd /s /q "{applicationInstallationDirectoryPath}"
+                            del %0
+                            """;
+
         try {
-            Directory.Delete(applicationInstallationDirectoryPath, true);
+            if (verbose) Console.WriteLine($"Create batch file: \"{batchFilePath}\"\n\n{batchContent}\n\n");
+            File.WriteAllText(batchFilePath, batchContent);
         }
         catch (Exception e) {
-            throw new Exception($"An error occurred while removing the application files from the directory \"{applicationInstallationDirectoryPath}\": {e.Message}.");
+            throw new Exception($"An error occurred while creating the batch file \"{batchFilePath}\" : {e.Message}");
         }
+        
+        // Start the batch file to remove the application files.
+        try {
+            if (verbose) Console.WriteLine($"Start batch file: \"{batchFilePath}\"");
+            var startInfo = new ProcessStartInfo { FileName = batchFilePath, CreateNoWindow = true, UseShellExecute = false, WindowStyle = ProcessWindowStyle.Hidden };
+            Process.Start(startInfo);
+        }
+        catch (Exception e) {
+            throw new Exception($"An error occurred while starting the batch file \"{batchFilePath}\" : {e.Message}");
+        }
+        
+        // End the current application.
+        Environment.Exit(0);
     }
     
     /// <summary>

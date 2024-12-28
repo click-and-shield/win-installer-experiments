@@ -13,6 +13,7 @@
         <option value="$PROJECT_DIR$/content-generator/bin/Release/net9.0/win-x64/publish" />
         <option value="$PROJECT_DIR$/java-launcher-gui-win/bin/Release/net9.0-windows/win-x64/publish" />
         <option value="$PROJECT_DIR$/common/bin/Release/net9.0/win-x64/publish" />
+        <option value="$PROJECT_DIR$/cli-uninstaller/bin/Release/net9.0/win-x64/publish" />
       </list>
     </option>
   </component>
