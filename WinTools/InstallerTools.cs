@@ -26,15 +26,17 @@ public class InstallerTools
     /// such as invalid file paths, inaccessible files, or other I/O related errors.
     /// </exception>
     public static void UnpackApplication(string applicationZipFilePath, string applicationInstallationDirectoryPath, bool verbose = false) {
+        // Make sure that the application directory does not exist.
+        if (Directory.Exists(applicationInstallationDirectoryPath)) {
+            throw new Exception($"The installation directory ({applicationInstallationDirectoryPath}) already exists.");
+        }
+
         // Create the installation directory if it does not exist.
-        if (!Directory.Exists(applicationInstallationDirectoryPath)) {
-            if (verbose) Console.WriteLine($"The installation directory does not exist: {applicationInstallationDirectoryPath}. Create it now.");
-            try {
-                Directory.CreateDirectory(applicationInstallationDirectoryPath);
-            }
-            catch (Exception e) {
-                throw new Exception($"An error occurred while creating the installation directory ({applicationInstallationDirectoryPath}): {e.Message}.");
-            }
+        try {
+            Directory.CreateDirectory(applicationInstallationDirectoryPath);
+        }
+        catch (Exception e) {
+            throw new Exception($"An error occurred while creating the installation directory ({applicationInstallationDirectoryPath}): {e.Message}.");
         }
         
         // Extract every file from the application's archive into the designated installation directory of the application.
@@ -43,7 +45,7 @@ public class InstallerTools
             ZipFile.ExtractToDirectory(applicationZipFilePath, applicationInstallationDirectoryPath);
         }
         catch (Exception e) {
-            throw new Exception($"An error occurred while extracting the application archive ({applicationZipFilePath}) in to the directory \"{applicationInstallationDirectoryPath}\": {e.Message}.");
+            throw new Exception($"An error occurred while extracting the application archive ({applicationZipFilePath}) in to the application directory ({applicationInstallationDirectoryPath}): {e.Message}.");
         }
     }
     
@@ -228,19 +230,17 @@ public class InstallerTools
         }
 
         try {
-            using (var shellKey = Registry.CurrentUser.CreateSubKey(keyPath)) {
-                if (shellKey is null) {
-                    throw new Exception($"Cannot create registry key: \"{keyPath}\"");
-                }
-                shellKey.SetValue("", label);
-                shellKey.SetValue("Icon", iconPath);
-                using (var commandKey = shellKey.CreateSubKey("command")) {
-                    if (commandKey is null) {
-                        throw new Exception($"Cannot create registry key: \"{keyPath}\\command\"");
-                    }
-                    commandKey.SetValue("", $"{commandToExecute}");
-                }
+            using var shellKey = Registry.CurrentUser.CreateSubKey(keyPath);
+            if (shellKey is null) {
+                throw new Exception($"Cannot create registry key: \"{keyPath}\"");
             }
+            shellKey.SetValue("", label);
+            shellKey.SetValue("Icon", iconPath);
+            using var commandKey = shellKey.CreateSubKey("command");
+            if (commandKey is null) {
+                throw new Exception($"Cannot create registry key: \"{keyPath}\\command\"");
+            }
+            commandKey.SetValue("", $"{commandToExecute}");
         }
         catch (Exception ex) {
             throw new Exception($"An error occurred while adding the contextual menu entry \"{label}\" : {ex.Message}");

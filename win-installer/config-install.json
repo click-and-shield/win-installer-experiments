@@ -1,0 +1,12 @@
+﻿{
+  "Name": "beeper",
+  "Version": "1.0",
+  "Publisher": "Click & Shield",
+  "IconPath": "beeper.ico",
+  "ExecutablePath": "beeper.exe",
+  "RegId": "beeper",
+  "ContextualMenuEntries": [
+    {"FilePattern":  "*", "Arguments":  "\"encrypt\" \"%1\"", "IconPath": "icon-encrypt.ico", "Label": "encrypt" },
+    {"FilePattern":  "*.skv", "Arguments":  "\"decrypt\" \"%1\"", "IconPath": "icon-decrypt.ico", "Label": "decrypt" }
+  ]
+}

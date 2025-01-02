@@ -105,6 +105,8 @@ public class Installer : InstallerBase
         try {
 #pragma warning disable CA1416
             if (Verbose) Console.WriteLine("Installing...");
+            // Create the application's directory and unpack the application archive.
+            Directory.CreateDirectory(ApplicationInstallationDirectoryPath);
             InstallerTools.UnpackApplication(_applicationArchivePath, ApplicationInstallationDirectoryPath, Verbose);
             InstallerTools.RegisterApplication(ApplicationRegistryKey, ApplicationName, ApplicationVersion, ApplicationPublisher, ApplicationInstallationDirectoryPath, ApplicationUninstallerPath, Verbose);
             if (ContextualMenuEntries is not null) {

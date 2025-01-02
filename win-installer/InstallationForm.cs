@@ -70,6 +70,8 @@ public sealed class InstallationForm : Form
     }
 
     private void _startInstallation() {
+        
+        
         _timer.Tick += Timer_Tick;
         _timer.Start();
     }

@@ -21,9 +21,35 @@
 /// </param>
 /// <param name="iconPath">The absolute path to the icon to display for the contextual menu entry.</param>
 public class ExplorerContextualMenuEntry {
+    /// <summary>
+    /// Gets or sets the file pattern that specifies the types of files or file names
+    /// to which the contextual menu entry should be applied.
+    /// This can include wildcards or specific file extensions to filter applicable files.
+    /// </summary>
     public required string FilePattern { get; set; }
+
+    /// <summary>
+    /// Gets or sets the arguments to be passed to the command when the contextual menu entry is selected.
+    /// These arguments are typically used as additional parameters for the executable specified in the command.
+    /// </summary>
     public required string Arguments   { get; set; }
-    public  string? Command    { get; set; }
-    public required string IconPath    { get; set; }
-    public required string Label       { get; set; }
+
+    /// <summary>
+    /// Gets or sets the command to be executed when the contextual menu entry is selected.
+    /// Typically, this is the executable file path, followed by the arguments (given by the entry "Arguments").
+    /// </summary>
+    public string? Command { get; set; }
+
+    /// <summary>
+    /// Gets or sets the path to the icon associated with the contextual menu entry.
+    /// The icon path is used to visually represent the menu entry in the user interface,
+    /// typically pointing to a file containing an image resource.
+    /// </summary>
+    public required string IconPath { get; set; }
+
+    /// <summary>
+    /// Gets or sets the label text displayed in the context menu entry within the Windows Explorer.
+    /// This text serves as the visible name of the menu option users interact with.
+    /// </summary>
+    public required string Label { get; set; }
 }
